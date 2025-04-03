@@ -1,0 +1,10 @@
+pandas
+requests
+flask
+plotly
+matplotlib
+scikit-learn
+tensorflow
+vaderSentiment
+python-dotenv
+

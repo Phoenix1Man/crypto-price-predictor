@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crypto Price Predictor</title>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: #fff;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .light-mode {
+      background-color: #f0f0f0;
+      color: #222;
+    }
+
+    header {
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      padding: 20px;
+      text-align: center;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #1e1e1e;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      transition: background-color 0.3s;
+    }
+
+    .light-mode .container {
+      background-color: #ffffff;
+      color: #000;
+    }
+
+    select, button {
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin: 0 5px;
+      font-weight: bold;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+
+    .tabs button {
+      background-color: #333;
+      color: #fff;
+      margin: 5px;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .tabs button.active {
+      background-color: #2196f3;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .sentiment {
+      text-align: center;
+      margin: 15px 0;
+      font-size: 1.1rem;
+    }
+
+    .toggle-switch {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+    }
+
+    .coin-selector {
+      margin: 20px auto;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .coin-selector select {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+
+    .light-mode .coin-selector select {
+      background-color: #f0f0f0;
+      color: #222;
+    }
+
+    .coin-selector select:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px #2196f3;
+    }
+
+    .coin-selector option {
+      background-color: #333;
+      color: #fff;
+      padding: 10px;
+    }
+
+    .light-mode .coin-selector option {
+      background-color: #f0f0f0;
+      color: #222;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+
+    .light-mode .search-box {
+      background-color: #f0f0f0;
+      color: #222;
+    }
+
+    .search-box:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px #2196f3;
+    }
+
+    .search-box::placeholder {
+      color: #888;
+    }
+
+    .light-mode .search-box::placeholder {
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Crypto Price Predictor</h1>
+    <div class="toggle-switch">
+      <button onclick="toggleMode()">🌓 Toggle Dark/Light Mode</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <form method="POST" style="text-align: center;">
+      <div class="coin-selector">
+        <input type="text" 
+               class="search-box" 
+               placeholder="Search coins..." 
+               onkeyup="filterCoins(this.value)"
+               autocomplete="off">
+        <select name="coins" multiple size="5" required id="coinSelect">
+          {% for coin in available_coins %}
+            <option value="{{ coin.id }}" {% if coin.id in coins %}selected{% endif %}>
+              {{ coin.name }} ({{ coin.symbol.upper() }})
+            </option>
+          {% endfor %}
+        </select>
+        <p style="font-size: 0.9em; color: #888;">Hold Ctrl/Cmd to select multiple coins</p>
+      </div>
+      
+      <div style="margin-bottom: 20px;">
+        <label>Days of Data:</label>
+        <select name="days">
+          <option value="7" {% if selected_days == 7 %}selected{% endif %}>7</option>
+          <option value="30" {% if selected_days == 30 %}selected{% endif %}>30</option>
+          <option value="60" {% if selected_days == 60 %}selected{% endif %}>60</option>
+        </select>
+        <button type="submit">Refresh</button>
+      </div>
+    </form>
+
+    <div class="tabs">
+      {% for c in coins %}
+      <button class="tablink {% if loop.first %}active{% endif %}" onclick="openTab('{{ c }}', event)">
+        {{ c.capitalize() }} ({{ sentiment_summary[c] }})
+      </button>
+      {% endfor %}
+    </div>
+
+    {% for chart in charts %}
+    <div id="{{ chart.coin }}" class="tab-content {% if loop.first %}active{% endif %}">
+      <div class="sentiment">
+        Sentiment: 
+        <span style="color: 
+          {% if sentiment_summary[chart.coin] == 'Positive' %}lime
+          {% elif sentiment_summary[chart.coin] == 'Negative' %}red
+          {% else %}orange{% endif %}
+        ">
+          {{ sentiment_summary[chart.coin] }}
+        </span>
+      </div>
+      {{ chart.chart | safe }}
+    </div>
+    {% endfor %}
+  </div>
+
+  <script>
+    function openTab(coin) {
+      const contents = document.querySelectorAll(".tab-content");
+      const buttons = document.querySelectorAll(".tablink");
+      contents.forEach(c => c.classList.remove("active"));
+      buttons.forEach(b => b.classList.remove("active"));
+      document.getElementById(coin).classList.add("active");
+      event.target.classList.add("active");
+    }
+
+    function toggleMode() {
+      document.body.classList.toggle("light-mode");
+    }
+
+    function filterCoins(searchText) {
+      const select = document.getElementById('coinSelect');
+      const options = select.options;
+      searchText = searchText.toLowerCase();
+
+      for (let i = 0; i < options.length; i++) {
+        const option = options[i];
+        const text = option.text.toLowerCase();
+        
+        if (text.includes(searchText)) {
+          option.style.display = '';
+        } else {
+          option.style.display = 'none';
+        }
+      }
+    }
+  </script>
+  <div class="container" style="margin-top: 40px;">
+    <h2 style="text-align: center;">📰 Latest Crypto News</h2>
+    <ul style="line-height: 1.8;">
+      {% for headline in news_headlines %}
+        <li style="margin-left: 20px;">{{ headline }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+</body>
+</html>

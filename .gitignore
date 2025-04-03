@@ -1,0 +1,19 @@
+# Environment / secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+
+# Logs / artifacts
+*.log
+
+# Jupyter & notebooks
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+env/
