@@ -99,7 +99,7 @@ nltk==3.8.1
 notebook==7.1.1
 notebook_shim==0.2.4
 numba==0.61.0
-numpy==1.26.4
+numpy==1.23.5
 oauthlib==3.2.2
 openai-whisper @ git+https://github.com/openai/whisper.git@517a43ecd132a2089d85f4ebc044728a71d49f6e
 opencv-python==4.9.0.80
