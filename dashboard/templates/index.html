@@ -158,6 +158,45 @@
     .light-mode .search-box::placeholder {
       color: #666;
     }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+      color: #888;
+      font-size: 0.9em;
+      border-top: 1px solid #333;
+    }
+
+    .light-mode footer {
+      color: #666;
+      border-top: 1px solid #ddd;
+    }
+
+    footer span {
+      font-weight: bold;
+      background: linear-gradient(45deg, #ff4500, #ff8c00, #ffd700);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: phoenixGlow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes phoenixGlow {
+      0% {
+        filter: brightness(1);
+      }
+      100% {
+        filter: brightness(1.2);
+      }
+    }
+
+    .light-mode footer span {
+      background: linear-gradient(45deg, #ff4500, #ff8c00, #ffd700);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
   </style>
 </head>
 <body>
@@ -261,5 +300,9 @@
       {% endfor %}
     </ul>
   </div>
+
+  <footer>
+    Powered by <span>Phoenix</span> © 2025
+  </footer>
 </body>
 </html>
