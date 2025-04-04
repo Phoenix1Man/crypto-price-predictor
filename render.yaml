@@ -2,7 +2,7 @@ services:
   - type: web
     name: crypto-price-predictor
     env: python
-    buildCommand: ""
-    startCommand: gunicorn dashboard.app:app
-    region: oregon
     plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn dashboard.app:app
+    pythonVersion: 3.10.13
